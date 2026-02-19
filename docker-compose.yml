@@ -1,0 +1,16 @@
+# vos-fastpath — OpenSIPS 3.4+ with XDP/AF_XDP
+# Run: docker-compose up -d
+# Requires: BPF loaded on host (./scripts/deploy.sh eth0), /sys/fs/bpf mounted
+
+services:
+  opensips:
+    image: opensips/opensips:3.4
+    container_name: vos-fastpath-opensips
+    privileged: true
+    network_mode: host
+    volumes:
+      - /sys/fs/bpf:/sys/fs/bpf:rw
+      - ./opensips.cfg:/etc/opensips/opensips.cfg:ro
+    environment:
+      - OPENSIPS_EXTRA_ARGS=
+    restart: unless-stopped
