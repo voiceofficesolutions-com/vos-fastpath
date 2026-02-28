@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!--
+  options-flood.xml — Lightweight OPTIONS keepalive flood.
+  Use this as a warm-up or raw header-processing baseline.
+  OpenSIPS replies 200 OK immediately with no state, so this
+  measures pure ingress throughput without dialog overhead.
+
+  Run:
+    sipp <TARGET> -sf bench/scenarios/options-flood.xml \
+         -t u1 -r 500 -l 0 -m 100000 \
+         -trace_stat -stf bench/results/options.csv
+-->
+<scenario name="OPTIONS flood">
+
+  <send retrans="500">
+    <![CDATA[
+OPTIONS sip:[remote_ip]:[remote_port] SIP/2.0
+Via: SIP/2.0/UDP [local_ip]:[local_port];branch=[branch]
+From: <sip:bench@[local_ip]>;tag=[call_number]
+To: <sip:bench@[remote_ip]>
+Call-ID: [call_id]
+CSeq: 1 OPTIONS
+Contact: <sip:bench@[local_ip]:[local_port]>
+Content-Length: 0
+Max-Forwards: 70
+User-Agent: SIPp-bench/1.0
+
+    ]]>
+  </send>
+
+  <recv response="200" optional="false" timeout="2000" />
+
+  <pause milliseconds="0" />
+
+</scenario>

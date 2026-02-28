@@ -20,7 +20,7 @@ High-performance SIP kernel-bypass engine for Voice Office Solutions: XDP interc
 - `bpftool` — standalone package on Debian 11+ / Ubuntu 22.04+ (`sudo apt install bpftool`); installs at `/usr/sbin/bpftool`. Fallback: `linux-tools-$(uname -r)` or `linux-tools-generic`.
 - **Kernel:** BTF and BPF (no separate module to load). Check: `ls /sys/kernel/btf/vmlinux`. If that file exists and `sudo ./scripts/deploy.sh eth0` still fails, see **[Kernel requirements](docs/KERNEL-REQUIREMENTS.md)** and try the **sim** (`sip_sim_setup.sh`) to confirm the stack works.
 
-**First time?** See the complete step-by-step guide: **[Build Prerequisites](docs/BUILD-PREREQS.md)** — includes `apt install` commands, PATH caveats, and every known pitfall.
+**First time?** Follow the full process: **[Getting Started](docs/GETTING-STARTED.md)** (kernel → build → deploy → verify). For build tools and pitfalls only: **[Build Prerequisites](docs/BUILD-PREREQS.md)**.
 
 ## Build and run (three commands)
 
@@ -45,8 +45,7 @@ High-performance SIP kernel-bypass engine for Voice Office Solutions: XDP interc
 1. **Bring the stack up** (as above): `make`, `sudo ./scripts/deploy.sh <interface>`, `docker-compose up -d`.
 
 2. **Allow your client** so OPTIONS and REGISTER aren’t dropped by the stealth filter:
-   - Single IP: `sudo ./scripts/allow_ip.sh <client_ip>` (e.g. `10.99.0.2`).
-   - Subnet: `sudo ./scripts/allow_ip.sh 192.168.0.0/24` (or `192.168.0/24`).
+   - `sudo ./scripts/allow_ip.sh <client_ip>` (e.g. `10.99.0.2`). Single IPv4 only.
 
 3. **Point your SIP client** at this host’s IP, port 5060. Use any username/domain (e.g. `user@your-server-ip`). The included `opensips.cfg` saves REGISTER to in-memory location and replies 200 OK; OPTIONS get 200 OK.
 
@@ -84,13 +83,14 @@ SIP **OPTIONS** from IPs not in `allowed_ips` are dropped (XDP_DROP); other meth
 
 ## Documentation (`docs/` — good press and operations)
 
+- **[Getting Started](docs/GETTING-STARTED.md)** — Full process from zero to working: kernel check, build tools, build, sim verify, deploy on NIC, allow client and test (single entry point).
 - **[Build prerequisites](docs/BUILD-PREREQS.md)** — Full apt install commands, bpftool PATH caveats, and all known build pitfalls (first-time setup guide).
 
 Benefits, proof, comparisons, and how to run it on other systems and feed honeypot data:
 
 - **[Shortest path to service delivery](docs/SHORTEST-PATH.md)** — Drop bad traffic at the NIC; for good traffic, minimum hops from NIC to OpenSIPS (AF_XDP when available).
 - **[Why this matters — benefits in depth](docs/BENEFITS.md)** — Performance (latency, throughput, CPU), stealth (hiding from scanners), DoS mitigation (blocklist), and operational impact.
-- **[Comparison: with vs without](docs/COMPARISON-WITH-VS-W ITHOUT.md)** — Same box, same traffic; what changes when vos-fastpath is loaded.
+- **[Comparison: with vs without](docs/COMPARISON-WITH-VS-WITHOUT.md)** — Same box, same traffic; what changes when vos-fastpath is loaded.
 - **[Comparison metrics (ready to use)](docs/COMPARISON-METRICS-READY.md)** — Numbers and one-liners for site, slides, or LinkedIn.
 - **[Proof numbers](docs/PROOF-NUMBERS.md)** — Real numbers from a stress run: packets dropped at NIC, stealth, blocklist, and one-liners to prove it works.
 - **[Reliability and testing](docs/RELIABILITY.md)** — Guarantees, stress test (`stress_test.sh`), failure modes, and service-provider readiness.

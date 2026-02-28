@@ -3,6 +3,8 @@
 Complete, step-by-step guide to installing build tools and successfully compiling
 `sip_logic.bpf.o` on a fresh Debian/Ubuntu system.
 
+**Full process (kernel → build → deploy → verify):** [GETTING-STARTED.md](GETTING-STARTED.md).
+
 ---
 
 ## 1. System requirements at a glance

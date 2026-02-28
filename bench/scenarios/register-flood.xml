@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!--
+  register-flood.xml — REGISTER storm with 100k+ distinct AoRs.
+  Tests location store write throughput in usrloc.
+
+  Run:
+    sipp <TARGET> -sf bench/scenarios/register-flood.xml \
+         -inf bench/data/users.csv \
+         -t u1 -r 1000 -l 0 -m 100000 \
+         -trace_stat -stf bench/results/register.csv
+-->
+<scenario name="REGISTER flood">
+
+  <send retrans="500">
+    <![CDATA[
+REGISTER sip:[remote_ip]:[remote_port] SIP/2.0
+Via: SIP/2.0/UDP [local_ip]:[local_port];branch=[branch]
+From: <sip:[field0]@[remote_ip]>;tag=[call_number]
+To: <sip:[field0]@[remote_ip]>
+Call-ID: [call_id]
+CSeq: 1 REGISTER
+Contact: <sip:[field0]@[local_ip]:[local_port]>;expires=3600
+Content-Length: 0
+Max-Forwards: 70
+User-Agent: SIPp-bench/1.0
+
+    ]]>
+  </send>
+
+  <recv response="200" optional="false" timeout="3000" />
+
+  <pause milliseconds="0" />
+
+</scenario>

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!--
+  invite-uac.xml — Full INVITE → 100 Trying → 200 OK → ACK → BYE call cycle.
+  OpenSIPS must have a media/B2BUA or a loopback UAS to complete the call.
+  Use this AFTER expanding opensips.cfg to proxy to an endpoint.
+
+  Pair with invite-uas.xml running on the same host as a local UAS:
+    sipp <LOCAL_IP>:5070 -sf bench/scenarios/invite-uas.xml -bg
+    sipp <OPENSIPS_IP> -sf bench/scenarios/invite-uac.xml \
+         -t u1 -r 100 -l 500 -m 10000 \
+         -trace_stat -stf bench/results/invite.csv
+
+  Or run a stateless UAS inline (OpenSIPS itself returns 200 OK).
+-->
+<scenario name="INVITE UAC (full call)">
+
+  <!-- INVITE -->
+  <send retrans="500">
+    <![CDATA[
+INVITE sip:bench@[remote_ip]:[remote_port] SIP/2.0
+Via: SIP/2.0/UDP [local_ip]:[local_port];branch=[branch]
+From: <sip:caller-[call_number]@[local_ip]>;tag=[call_number]
+To: <sip:bench@[remote_ip]>
+Call-ID: [call_id]
+CSeq: 1 INVITE
+Contact: <sip:caller-[call_number]@[local_ip]:[local_port]>
+Max-Forwards: 70
+Content-Type: application/sdp
+Content-Length: [len]
+User-Agent: SIPp-bench/1.0
+
+v=0
+o=bench [call_number] [call_number] IN IP4 [local_ip]
+s=SIPp bench
+c=IN IP4 [local_ip]
+t=0 0
+m=audio 6000 RTP/AVP 0 8 101
+a=rtpmap:0 PCMU/8000
+a=rtpmap:8 PCMA/8000
+a=rtpmap:101 telephone-event/8000
+a=fmtp:101 0-15
+a=sendrecv
+    ]]>
+  </send>
+
+  <!-- 100 Trying (optional) -->
+  <recv response="100" optional="true" />
+
+  <!-- 180 Ringing (optional) -->
+  <recv response="180" optional="true" />
+
+  <!-- 200 OK — required -->
+  <recv response="200" optional="false" timeout="5000">
+    <action>
+      <ereg regexp="[tT]ag=([^;]+)" search_in="hdr" header="To:" assign_to="to_tag" />
+    </action>
+  </recv>
+
+  <!-- ACK -->
+  <send>
+    <![CDATA[
+ACK sip:bench@[remote_ip]:[remote_port] SIP/2.0
+Via: SIP/2.0/UDP [local_ip]:[local_port];branch=[branch]
+From: <sip:caller-[call_number]@[local_ip]>;tag=[call_number]
+To: <sip:bench@[remote_ip]>;tag=[$to_tag]
+Call-ID: [call_id]
+CSeq: 1 ACK
+Max-Forwards: 70
+Content-Length: 0
+
+    ]]>
+  </send>
+
+  <!-- Hold call for 100ms to simulate real call leg -->
+  <pause milliseconds="100" />
+
+  <!-- BYE -->
+  <send retrans="500">
+    <![CDATA[
+BYE sip:bench@[remote_ip]:[remote_port] SIP/2.0
+Via: SIP/2.0/UDP [local_ip]:[local_port];branch=[branch]
+From: <sip:caller-[call_number]@[local_ip]>;tag=[call_number]
+To: <sip:bench@[remote_ip]>;tag=[$to_tag]
+Call-ID: [call_id]
+CSeq: 2 BYE
+Max-Forwards: 70
+Content-Length: 0
+
+    ]]>
+  </send>
+
+  <!-- 200 OK for BYE -->
+  <recv response="200" optional="false" timeout="3000" />
+
+</scenario>

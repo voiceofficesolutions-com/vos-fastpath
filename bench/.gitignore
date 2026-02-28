@@ -1,0 +1,4 @@
+# SIPp benchmark results — generated per run, never commit
+results/
+*.err
+*.csv

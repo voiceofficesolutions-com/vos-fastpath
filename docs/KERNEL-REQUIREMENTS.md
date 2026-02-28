@@ -2,6 +2,8 @@
 
 There is **no separate kernel module to load**. XDP and BPF support are built into the kernel. Your kernel must be compiled with the right options and you need root (or the right capabilities) to attach the program.
 
+**Full process (kernel → build → deploy → verify):** [GETTING-STARTED.md](GETTING-STARTED.md).
+
 ---
 
 ## 1. What the kernel must have (compile-time)
@@ -69,7 +71,32 @@ Then build and install the kernel as you normally do. After booting into it, che
 
 ---
 
-## 3. How to check (run these)
+## 3. Verify your running kernel config (optional)
+
+To confirm the **running** kernel was built with BTF and BPF, inspect the config that was used to build it:
+
+**If the config is present (common on Debian/Ubuntu):**
+```bash
+grep -E 'CONFIG_DEBUG_INFO_BTF|CONFIG_BPF_SYSCALL|CONFIG_BPF_JIT' /boot/config-$(uname -r)
+```
+
+Expected:
+```
+CONFIG_DEBUG_INFO_BTF=y
+CONFIG_BPF_SYSCALL=y
+CONFIG_BPF_JIT=y
+```
+
+**If you have /proc/config.gz (some distros):**
+```bash
+zcat /proc/config.gz 2>/dev/null | grep -E 'CONFIG_DEBUG_INFO_BTF|CONFIG_BPF_SYSCALL|CONFIG_BPF_JIT'
+```
+
+If neither exists, the definitive check is still: `ls /sys/kernel/btf/vmlinux`. If that file exists, the running kernel has BTF.
+
+---
+
+## 4. How to check (run these)
 
 **BTF (required for build and load):**
 ```bash
@@ -110,7 +137,7 @@ sudo ./scripts/deploy.sh eth0
 
 ---
 
-## 4. No module to load
+## 5. No module to load (no modprobe)
 
 You do **not** need to run `modprobe` for XDP or BPF. There is no `xdp.ko` or `bpf.ko` to load. If your kernel has the config above, it’s already there. If loading still fails, it’s usually:
 
@@ -120,7 +147,7 @@ You do **not** need to run `modprobe` for XDP or BPF. There is no `xdp.ko` or `b
 
 ---
 
-## 5. Quick “does it work?” test
+## 6. Quick “does it work?” test
 
 From the repo root:
 

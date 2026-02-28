@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!--
+  invite-uas.xml — Stateless UAS that immediately returns 200 OK.
+  Run this locally so the UAC scenario gets a valid 200 to ACK/BYE.
+
+  Usage (loopback UAS on port 5070):
+    sipp -sn uas -p 5070 -t u1 -bg
+
+  Or use this file for fuller control:
+    sipp [local_ip]:5070 -sf bench/scenarios/invite-uas.xml -t u1 -bg
+-->
+<scenario name="INVITE UAS (loopback 200 OK)">
+
+  <!-- Wait for incoming INVITE -->
+  <recv request="INVITE" />
+
+  <!-- 100 Trying -->
+  <send>
+    <![CDATA[
+SIP/2.0 100 Trying
+[last_Via:]
+[last_From:]
+[last_To:];tag=[call_number]
+[last_Call-ID:]
+[last_CSeq:]
+Content-Length: 0
+
+    ]]>
+  </send>
+
+  <!-- 200 OK with SDP answer -->
+  <send retrans="500">
+    <![CDATA[
+SIP/2.0 200 OK
+[last_Via:]
+[last_From:]
+[last_To:];tag=[call_number]
+[last_Call-ID:]
+[last_CSeq:]
+Contact: <sip:[local_ip]:5070>
+Content-Type: application/sdp
+Content-Length: [len]
+
+v=0
+o=uas 1234 1234 IN IP4 [local_ip]
+s=SIPp UAS
+c=IN IP4 [local_ip]
+t=0 0
+m=audio 6010 RTP/AVP 0 8
+a=rtpmap:0 PCMU/8000
+a=rtpmap:8 PCMA/8000
+a=sendrecv
+    ]]>
+  </send>
+
+  <!-- Wait for ACK -->
+  <recv request="ACK" optional="false" timeout="3000" />
+
+  <!-- Wait for BYE -->
+  <recv request="BYE" optional="false" timeout="10000" />
+
+  <!-- 200 OK for BYE -->
+  <send>
+    <![CDATA[
+SIP/2.0 200 OK
+[last_Via:]
+[last_From:]
+[last_To:]
+[last_Call-ID:]
+[last_CSeq:]
+Content-Length: 0
+
+    ]]>
+  </send>
+
+</scenario>

@@ -8,6 +8,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- `bench/bench.sh` — positional `compare` subcommand (`bench.sh compare -i <iface>
+  -s <method> -r <pps> -m <total>`) as an alias for `--compare`. Runs baseline
+  (XDP off) then XDP fastpath phase back-to-back and prints a side-by-side diff
+  table of success, failed, and retransmit counts using SIPp.
 - `docs/BUILD-PREREQS.md` — comprehensive step-by-step guide for installing build
   dependencies and compiling `sip_logic.bpf.o` from scratch, including all known
   pitfalls discovered during first-build verification.
