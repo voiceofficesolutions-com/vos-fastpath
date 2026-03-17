@@ -8,6 +8,28 @@ High-performance SIP kernel-bypass engine for Voice Office Solutions: XDP interc
 
 ![vos-fastpath Architecture](
 docs/Gemini_Generated_Image_tgmuzltgmuzltgmu.png)
+
+## 🛠️ Implementation: 1:1 Hardware Alignment
+
+To eliminate "cache-line bouncing" and context-switch overhead, **vos-fastpath** enforces a strict 1:1 mapping between NIC hardware queues and physical CPU cores. This ensures that a SIP packet is received, filtered by XDP, and processed by OpenSIPS/AF_XDP all within the same CPU L1/L2 cache boundary.
+
+
+
+### Automatic Core Awareness
+The deployment script utilizes `nproc` and `lscpu` topology detection to:
+1. **Detect Physical Cores:** Automatically identifies the available processing units to avoid Hyper-threading contention.
+2. **Scale NIC Queues:** Dynamically reconfigures the NIC via `ethtool -L` to match the core count, creating parallel processing lanes.
+3. **Static IRQ Pinning:** Disables the OS `irqbalance` daemon and forces specific NIC Interrupt Requests (IRQs) to stay on their assigned cores.
+4. **NAPI Busy Polling:** Sets `napi_defer_hard_irqs` to keep the CPU in a high-performance polling state, eliminating the "wake-up" latency for incoming SIP packets.
+
+### Setup Instructions
+Run the affinity tuner before launching the containers to lock the hardware path:
+
+# Detects eth0 topology and pins IRQs to individual cores
+
+```bash
+sudo ./scripts/setup_affinity.sh eth0
+```
 ## Proven effective
 
 **Unwanted traffic never reaches your stack or OpenSIPS.** In tests, 80 packets (30 OPTIONS stealth + 50 blocklist) were dropped at the NIC in a single run — zero of them touched the kernel or the application. Scanners get no OPTIONS reply, so you stay invisible. Blocklisted IPs are dropped in one map lookup. Valid SIP passes through or goes zero-copy via AF_XDP. Result: **less CPU, less noise, 10–25% lower median RTT under load** when junk is filtered at the NIC. The same policy runs everywhere you deploy.
