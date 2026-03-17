@@ -6,8 +6,8 @@ High-performance SIP kernel-bypass engine for Voice Office Solutions: XDP interc
 
 ##Lockless Architecture 
 
-![vos-fastpath Architecture](docs /images/Gemini_Generated_Image_tgmuzltgmuzltgmu.png)
-
+![vos-fastpath Architecture](
+docs/Gemini_Generated_Image_tgmuzltgmuzltgmu.png)
 ## Proven effective
 
 **Unwanted traffic never reaches your stack or OpenSIPS.** In tests, 80 packets (30 OPTIONS stealth + 50 blocklist) were dropped at the NIC in a single run — zero of them touched the kernel or the application. Scanners get no OPTIONS reply, so you stay invisible. Blocklisted IPs are dropped in one map lookup. Valid SIP passes through or goes zero-copy via AF_XDP. Result: **less CPU, less noise, 10–25% lower median RTT under load** when junk is filtered at the NIC. The same policy runs everywhere you deploy.
