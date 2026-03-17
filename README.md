@@ -6,7 +6,7 @@ High-performance SIP kernel-bypass engine for Voice Office Solutions: XDP interc
 
 ##Lockless Architecture 
 
-![vos-fastpath Architecture](/docs /images/Gemini_Generated_Image_tgmuzltgmuzltgmu.png)
+![vos-fastpath Architecture](docs /images/Gemini_Generated_Image_tgmuzltgmuzltgmu.png)
 
 ## Proven effective
 
