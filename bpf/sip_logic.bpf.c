@@ -29,6 +29,22 @@ struct {
 	__uint(max_entries, 64);
 } xsks_map SEC(".maps");
 
+/* Stealth: Per-CPU allowed source IPs (Zero-Contention Lookups) */
+struct {
+    __uint(type, BPF_MAP_TYPE_PERCPU_HASH); // Changed from HASH
+    __type(key, __u32);   /* IPv4 addr */
+    __type(value, __u8);  /* 1 = allowed */
+    __uint(max_entries, 256);
+} allowed_ips SEC(".maps");
+
+/* DoS: Per-CPU blocklist (Zero-Contention Lookups) */
+struct {
+    __uint(type, BPF_MAP_TYPE_PERCPU_HASH); // Changed from HASH
+    __type(key, __u32);   /* IPv4 addr */
+    __type(value, __u8);  /* 1 = blocked */
+    __uint(max_entries, 1024);
+} blocked_ips SEC(".maps");
+
 /* Stealth: allowed source IPs for SIP OPTIONS (single IP per entry) */
 struct {
 	__uint(type, BPF_MAP_TYPE_HASH);
@@ -36,14 +52,6 @@ struct {
 	__type(value, __u8);  /* 1 = allowed */
 	__uint(max_entries, 256);
 } allowed_ips SEC(".maps");
-
-/* DoS: blocklist — drop all UDP 5060 from these IPs before stack/OpenSIPS */
-struct {
-	__uint(type, BPF_MAP_TYPE_HASH);
-	__type(key, __u32);   /* IPv4 addr */
-	__type(value, __u8);  /* 1 = blocked */
-	__uint(max_entries, 1024);
-} blocked_ips SEC(".maps");
 
 /* Per-CPU counters for metrics (sum in user space) */
 enum xdp_counter {
